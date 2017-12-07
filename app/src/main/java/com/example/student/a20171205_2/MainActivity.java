@@ -2,6 +2,7 @@ package com.example.student.a20171205_2;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -22,33 +23,32 @@ public class MainActivity extends AppCompatActivity {
     TextView tv;
     ListView lv;
     String data[];
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        tv = (TextView) findViewById(R.id.textView);
+        lv = (ListView) findViewById(R.id.listView);
         RequestQueue queue = Volley.newRequestQueue(this);
-        final StringRequest request = new StringRequest("http://www.google.com.tw", new Response.Listener<String>() {
+        final StringRequest request = new StringRequest("http://data.ntpc.gov.tw/od/data/api/BF90FA7E-C358-4CDA-B579-B6C84ADC96A1?$format=json",
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Gson gson = new Gson();
+                        Animal[] newtaipei = gson.fromJson(response, Animal[].class);
+                        data = new String[newtaipei.length];
+                        for (int i=0;i<newtaipei.length;i++)
+                        {
+                            String str = newtaipei[i].district;
+                            String addr = newtaipei[i].address;
+                            data[i] = str + "," + addr;
+                        }
+                        ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this,
+                                android.R.layout.simple_list_item_1, data);
+                        lv.setAdapter(adapter);
 
-            @Override
-            public void onResponse(String response) {
-                try {
-                    final JSONArray array = new JSONArray(response) {
 
-                        JSONObject object = array.getJSONObject(0);
-                        String str = object.getString("district");
-                        String addr = object.getString("address");
-                        StringBuffer sb = new StringBuffer();
-                        sb.
-                    };
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        }, new Response.ErrorListener() {
-
+                    }
+                }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
 
@@ -56,5 +56,6 @@ public class MainActivity extends AppCompatActivity {
         });
         queue.add(request);
         queue.start();
+
     }
 }
